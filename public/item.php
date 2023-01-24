@@ -23,7 +23,7 @@ while ($row = fetch_array($query)):
 <div class="row">
 
     <div class="col-md-7">
-       <img class="img-responsive" src="<?php echo $row['product_image']; ?>" alt="">
+       <img class="img-responsive" src="../resources/<?php echo display_image($row['product_image']); ?>" alt="">
 
     </div>
 
@@ -53,7 +53,7 @@ while ($row = fetch_array($query)):
    
     <form action="">
         <div class="form-group">
-            <a href="cart.php?add=<?php echo $row['product_id']; ?>" class="btn btn-primary">ADD</a>
+            <a href="../resources/cart.php?add=<?php echo $row['product_id']; ?>" class="btn btn-primary">ADD</a>
         </div>
     </form>
 

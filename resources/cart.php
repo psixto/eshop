@@ -1,4 +1,4 @@
-<?php require_once("../resources/config.php"); ?>
+<?php require_once("config.php"); ?>
 
 <?php 
 
@@ -15,12 +15,12 @@
         if ($row['product_quantity'] != $_SESSION['product_' . $_GET['add']]) {
 
             $_SESSION['product_' . $_GET['add']] += 1;
-            redirect("checkout.php");
+            redirect("../public/checkout.php");
 
         } else {
 
             set_message("We only have " . $row['product_quantity'] . " " . "{$row['product_title']}" . " available");            
-            redirect("checkout.php");
+            redirect("../public/checkout.php");
         }
     }   
 }
@@ -33,11 +33,11 @@ if(isset($_GET['remove'])) {
         
         unset($_SESSION['item_total']);
         unset($_SESSION['item_quantity']);
-        redirect("checkout.php");
+        redirect("../public/checkout.php");
 
     } else {
 
-        redirect("checkout.php");
+        redirect("../public/checkout.php");
 
     }
 }
@@ -49,7 +49,7 @@ if(isset($_GET['delete'])) {
     unset($_SESSION['item_total']);
     unset($_SESSION['item_quantity']);
 
-    redirect("checkout.php");
+    redirect("../public/checkout.php");
 
 }
 
@@ -82,14 +82,18 @@ function cart() {
                     $sub = $row['product_price'] * $value;
                     $item_quantity += $value;
 
+                    $product_image = display_image($row['product_image']);
+
                     $product = <<<DELIMETER
                     <tr>
-                        <td>{$row['product_title']}</td>
+                        <td>{$row['product_title']}<br>
+                        <img width='100' src='../resources/{$product_image}'>
+                        </td>
                         <td>{$row['product_price']}&#8364;</td>
                         <td>{$value}</td>
                         <td>{$sub}&#8364;</td>
-                        <td><a class='btn btn-warning' href="cart.php?remove={$row['product_id']}"><span class='glyphicon glyphicon-minus'></span></a>   <a class='btn btn-success'href="cart.php?add={$row['product_id']}"><span class='glyphicon glyphicon-plus'></span></a></td>
-                        <td><a class='btn btn-danger' href="cart.php?delete={$row['product_id']}"><span class='glyphicon glyphicon-trash'></a></td>
+                        <td><a class='btn btn-warning' href="../resources/cart.php?remove={$row['product_id']}"><span class='glyphicon glyphicon-minus'></span></a>   <a class='btn btn-success'href="../resources/cart.php?add={$row['product_id']}"><span class='glyphicon glyphicon-plus'></span></a></td>
+                        <td><a class='btn btn-danger' href="../resources/cart.php?delete={$row['product_id']}"><span class='glyphicon glyphicon-trash'></a></td>
 
                         <input type="hidden" name="item_name_{$item_name}" value="{$row['product_title']}">
                         <input type="hidden" name="item_number_{$item_number}" value="{$row['product_id']}">
@@ -111,6 +115,67 @@ function cart() {
         }
     }
 }
+
+function proccess_transaction() {
+
+    //check valid transaction and params
+    if(isset($_GET['tx'])) {
+        
+        $amount = $_GET['amt'];
+        $currency = $_GET['cc'];
+        $transaction = $_GET['tx'];
+        $status = $_GET['st'];
+        $total = 0;
+        $item_quantity = 0;
+
+        foreach ($_SESSION as $name => $value) {
+
+            if ($value > 0) {
+                //substr - return part of the string
+                if (substr($name, 0, 8) == "product_") {
+
+                    $length = strlen($name) - 8;
+                    $id = substr($name, 8, $length);
+
+                    //It needs to be here to no create a product table row each time
+                    //we access the thank_you page, only when there is some products in checkout
+                    $send_order = query("INSERT INTO orders (order_amount, order_transaction, 
+                    order_status, order_currency) VALUES('{$amount}', '{$transaction}',
+                     '{$status}', '{$currency}')");
+                    $last_order_id = last_id();
+                    confirm($send_order);
+
+                    $query = query("SELECT * FROM products WHERE product_id = " . escape_string($id) . " ");
+                    confirm($query);
+
+                    while ($row = fetch_array($query)) {
+
+                        $product_price = $row['product_price'];
+                        $product_title = $row['product_title'];
+                        $sub = $product_price * $value;
+                        $item_quantity += $value;
+
+                        $insert_report = query("INSERT INTO reports (product_id, order_id, product_price, 
+                        product_title, product_quantity) VALUES('{$id}', '{$last_order_id}', '{$product_price}',
+                        '{$product_title}', '{$value}')");
+
+                        confirm($insert_report);
+
+                    }
+
+                    $total += $sub;
+                    $item_quantity;
+                }
+            }
+        }
+        session_destroy();
+
+    } else {
+        redirect("index.php");
+    }
+
+}
+
 
 function show_paypal() {
 
