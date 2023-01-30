@@ -109,7 +109,7 @@ function get_catagories() {
 
 function get_products_in_cat_page() {
 
-    $query = query("SELECT * FROM products WHERE product_category_id = ". escape_string($_GET['id']) ." AND  WHERE product_quantity >= 1 ");
+    $query = query("SELECT * FROM products WHERE product_category_id = ". escape_string($_GET['id']) ." ");
     confirm($query);
 
     while($row = fetch_array($query)) {
@@ -122,7 +122,7 @@ function get_products_in_cat_page() {
                     <img src="../resources/{$product_image}" alt="">
                     <div class="caption">
                         <h3>{$row['product_title']}</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                        <p>{$row['short_desc']}</p>
                         <p>
                             <a href="../resources/cart.php?add={$row['product_id']}" class="btn btn-primary">Buy Now!</a> <a href="item.php?id={$row['product_id']}" class="btn btn-default">More Info</a>
                         </p>

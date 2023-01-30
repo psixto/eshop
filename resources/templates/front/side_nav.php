@@ -1,5 +1,5 @@
 <div class="col-md-3">
-    <p class="lead">Shop Name</p>
+    <h1 class="lead">S4E - SOFTWARE FOR EVER</h1>
     <div class="list-group">
 
         <?php
