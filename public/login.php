@@ -17,7 +17,7 @@
                     <!-- super global !-->
                     username<input type="text" name="username" class="form-control"></label>
                 </div>
-                 <div class="form-group"><label for="password">
+                <div class="form-group"><label for="password">
                     <!-- super global !-->
                     Password<input type="password" name="password" class="form-control"></label>
                 </div>
