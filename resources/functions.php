@@ -180,8 +180,13 @@ function login_user() {
         } else {
 
             $_SESSION['username'] = $username;
-            //set_message("Welcome {$username}");
-            redirect("admin");
+            $_SESSION['password'] = $password;
+            $row_user = mysqli_fetch_array($query);
+            if ($row_user['admin_user'] == 1) {    
+                //set_message("Welcome {$username}");
+                redirect("admin");
+            } else
+                redirect("normaluser");
         }
     }
 }
@@ -474,6 +479,25 @@ function add_user() {
 
 }
 
+function signup() {
+
+    if(isset($_POST['signup'])) {
+
+        $username   = escape_string($_POST['username']);
+        $email      = escape_string($_POST['email']);
+        $password   = escape_string($_POST['password']);
+        $admin_user = 0;
+    
+        $query = query("INSERT INTO users(username,email,password,admin_user) VALUES('{$username}','{$email}','{$password}', '{$admin_user}')");
+        confirm($query);
+
+        $_SESSION['username'] = $username;
+        redirect("admin");
+
+    }
+
+}
+
 /************* Reports *************/
 
 function get_reports() {
@@ -481,6 +505,39 @@ function get_reports() {
     $query = query("SELECT * FROM reports");
     confirm($query);
 
+    //user_id == 0 means non registered
+    while($row = fetch_array($query)) {
+
+        $report = <<<DELIMETER
+        <tr>
+            <td>{$row['report_id']}</td>
+            <td>{$row['user_id']}</td>
+            <td>{$row['product_id']}</td>
+            <td>{$row['order_id']}</td>
+            <td>{$row['product_price']}</td>
+            <td>{$row['product_title']}</td>
+            <td>{$row['product_quantity']}</td>
+            <td><a class="btn btn-danger" href="../../resources/templates/back/delete_report.php?id={$row['report_id']}">
+               <span class="glyphicon glyphicon-remove"></span></a>
+               </td>
+        </tr>
+        DELIMETER;
+
+        echo $report;
+    }
+}
+
+function get_reports_normaluser($username,$passwd) {
+
+    $query_user = query("SELECT * FROM users WHERE username = '{$username}' AND password = '{$passwd}' ");
+    confirm($query_user);
+    $row_user = mysqli_fetch_array($query_user);
+    $user_id = $row_user['user_id'];
+    
+    $query = query("SELECT * FROM reports WHERE user_id = " . escape_string($user_id) . " ");
+    confirm($query);
+
+    //user_id == 0 means non registered
     while($row = fetch_array($query)) {
 
         $report = <<<DELIMETER

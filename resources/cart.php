@@ -2,6 +2,16 @@
 
 <?php 
 
+    if(isset($_SESSION['username'])) {
+        $query_user = query("SELECT * FROM users WHERE username = '{$_SESSION['username']}' AND password = '{$_SESSION['password']}' ");
+	    confirm($query_user);
+	
+	    $row_user = mysqli_fetch_array($query_user);
+	    $GLOBALS['a'] = $row_user['user_id'];
+    } else {
+        $GLOBALS['a'] = 0;
+    }
+
     if(isset($_GET['add'])) {
 
     $query = query("SELECT * FROM products WHERE product_id = ". escape_string($_GET['add']) ." ");
@@ -155,16 +165,32 @@ function proccess_transaction() {
                         $sub = $product_price * $value;
                         $item_quantity += $value;
 
-                        $insert_report = query("INSERT INTO reports (product_id, order_id, product_price, 
-                        product_title, product_quantity) VALUES('{$id}', '{$last_order_id}', '{$product_price}',
+                        $insert_report = query("INSERT INTO reports (user_id, product_id, order_id, product_price, 
+                        product_title, product_quantity) VALUES('{$GLOBALS['a']}', '{$id}', '{$last_order_id}', '{$product_price}',
                         '{$product_title}', '{$value}')");
 
                         confirm($insert_report);
 
+                        $item_quantity = $row['product_quantity'] - $value;
+                        //decrease the product_quantity
+                        $query_update = "UPDATE products SET ";
+                        //query concatenated
+                        $query_update .= "product_title        = '{$row['product_title']}'        , ";
+                        $query_update .= "product_category_id  = '{$row['product_category_id']}'  , ";
+                        $query_update .= "product_price        = '{$row['product_price']}'        , ";
+                        $query_update .= "product_quantity     = '{$item_quantity}'               , ";
+                        $query_update .= "product_description  = '{$row['product_description']}'  , ";
+                        $query_update .= "short_desc           = '{$row['short_desc']}'           , ";
+                        $query_update .= "product_image        = '{$row['product_image']}'          ";
+                        $query_update .= "WHERE product_id="  . escape_string($id);
+
+                        $send_update_query = query($query_update);
+                        confirm($send_update_query);
+
                     }
 
                     $total += $sub;
-                    $item_quantity;
+                    //$item_quantity = $row['product_quantity'] - $value;
                 }
             }
         }

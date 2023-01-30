@@ -1,4 +1,3 @@
-
 <div class="row">
 
 <h1 class="page-header">
@@ -15,7 +14,6 @@
 
       <tr>
            <th>Id</th>
-           <th>User Id</th>
            <th>Product Id</th>
            <th>Order Id</th>
            <th>Price</th>
@@ -25,7 +23,7 @@
     </thead>
     <tbody>
 
-      <?php get_reports(); ?>
+    <?php get_reports_normaluser($_SESSION['username'],$_SESSION['password']); ?>
 
     </tbody>
 </table>
