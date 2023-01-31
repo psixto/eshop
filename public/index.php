@@ -19,7 +19,6 @@
 
                     <div class="col-md-12">
                         <!--Carousel!-->
-                        <?//php include(TEMPLATE_FRONT . DS . "slider.php") ?>
                         
                     </div>
 
